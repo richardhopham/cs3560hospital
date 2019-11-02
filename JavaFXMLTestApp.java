@@ -7,7 +7,10 @@ package javafxmltestapp;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 
 import javafx.application.Application;
@@ -33,15 +36,25 @@ public class JavaFXMLTestApp extends Application {
     }
     
     public static void connect() throws SQLException { 
-    	String url = "jdbc:postgresql://database-1.cakeqdu3h1oe.us-west-1.rds.amazonaws.com/";
+    	String url = "jdbc:postgresql://database-1.cakeqdu3h1oe.us-west-1.rds.amazonaws.com:5432/";
 		Properties props = new Properties();
 		props.setProperty("user","postgres");
 		props.setProperty("password","password");
  
 		Connection conn = DriverManager.getConnection(url, props);
 		String sqlStatement = "SELECT * FROM Public.Patients;";
-		conn.prepareStatement(sqlStatement).execute();
+		Statement stmt = conn.createStatement();
+		ResultSet rs = stmt.executeQuery(sqlStatement);
+		
+		while(rs.next()) {
+			System.out.println(rs.getString(1));
+			System.out.println(rs.getString(2));
+			System.out.println(rs.getString(3));
+			System.out.println(rs.getString(4));
+			System.out.println(rs.getString(5));
+		}
 		conn.close();
+		
     }
 
     /**
