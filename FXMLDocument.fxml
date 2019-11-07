@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane fx:id="mainBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="622.0" prefWidth="765.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane fx:id="mainBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="622.0" prefWidth="765.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafxmltestapp.FXMLDocumentController">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
@@ -70,10 +70,10 @@
                         </AnchorPane>
                         <ButtonBar fx:id="d_ButtonBar" layoutX="10.0" layoutY="160.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0">
                           <buttons>
-                            <Button fx:id="d_newButton" mnemonicParsing="false" text="New" />
-                              <Button fx:id="d_editButton" mnemonicParsing="false" text="Edit" />
-                              <Button fx:id="d_deleteButton" mnemonicParsing="false" text="Delete" />
-                              <Button fx:id="d_saveButton" mnemonicParsing="false" text="Save" />
+                            <Button fx:id="d_newButton" mnemonicParsing="false" onAction="#d_newButton_OnAction" text="New" />
+                              <Button fx:id="d_editButton" mnemonicParsing="false" onAction="#d_editButton_OnAction" text="Edit" />
+                              <Button fx:id="d_deleteButton" mnemonicParsing="false" onAction="#d_deleteButton_OnAction" text="Delete" />
+                              <Button fx:id="d_saveButton" mnemonicParsing="false" onAction="#d_saveButton_OnAction" text="Save" />
                           </buttons>
                         </ButtonBar>
                         <TableView fx:id="d_TableView" layoutX="150.0" layoutY="200.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="200.0">
@@ -124,10 +124,10 @@
                         </AnchorPane>
                         <ButtonBar fx:id="p_patientButtonBar" layoutY="311.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="311.0">
                           <buttons>
-                            <Button fx:id="p_newButton" mnemonicParsing="false" text="New" />
-                              <Button fx:id="p_editButton" mnemonicParsing="false" text="Edit" />
-                              <Button fx:id="p_deleteButton" mnemonicParsing="false" text="Delete" />
-                              <Button fx:id="p_saveButton" mnemonicParsing="false" text="Save" />
+                            <Button fx:id="p_newButton" mnemonicParsing="false" onAction="#p_newButton_OnAction" text="New" />
+                              <Button fx:id="p_editButton" mnemonicParsing="false" onAction="#p_editButton_OnAction" text="Edit" />
+                              <Button fx:id="p_deleteButton" mnemonicParsing="false" onAction="#p_deleteButton_OnAction" text="Delete" />
+                              <Button fx:id="p_saveButton" mnemonicParsing="false" onAction="#p_saveButton_OnAction" text="Save" />
                           </buttons>
                         </ButtonBar>
                         <TableView fx:id="p_TableView" layoutX="68.0" layoutY="315.0" prefHeight="210.0" prefWidth="708.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="351.0">
@@ -158,10 +158,10 @@
                         </AnchorPane>
                         <ButtonBar fx:id="a_appointmentButtonBar" layoutY="153.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="153.0">
                           <buttons>
-                            <Button fx:id="a_newButton" mnemonicParsing="false" text="New" />
-                              <Button fx:id="a_editButton" mnemonicParsing="false" text="Edit" />
-                              <Button fx:id="a_deleteButton" mnemonicParsing="false" text="Delete" />
-                              <Button fx:id="a_saveButton" mnemonicParsing="false" text="Save" />
+                            <Button fx:id="a_newButton" mnemonicParsing="false" onAction="#a_newButton_OnAction" text="New" />
+                              <Button fx:id="a_editButton" mnemonicParsing="false" onAction="#a_editButton_OnAction" text="Edit" />
+                              <Button fx:id="a_deleteButton" mnemonicParsing="false" onAction="#a_deleteButton_OnAction" text="Delete" />
+                              <Button fx:id="a_saveButton" mnemonicParsing="false" onAction="#a_saveButton_OnAction" text="Save" />
                           </buttons>
                         </ButtonBar>
                         <TableView fx:id="a_TableView" layoutX="14.0" layoutY="193.0" prefHeight="317.0" prefWidth="708.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="193.0">
@@ -198,10 +198,10 @@
                         </AnchorPane>
                         <ButtonBar fx:id="ph_ButtonBar" layoutY="182.0" prefHeight="40.0" prefWidth="200.0">
                           <buttons>
-                            <Button fx:id="ph_newButton" mnemonicParsing="false" text="New" />
-                              <Button fx:id="ph_editButton" mnemonicParsing="false" text="Edit" />
-                              <Button fx:id="ph_deleteButton" mnemonicParsing="false" text="Delete" />
-                              <Button fx:id="ph_saveButton" mnemonicParsing="false" text="Save" />
+                            <Button fx:id="ph_newButton" mnemonicParsing="false" onAction="#ph_newButton_OnAction" text="New" />
+                              <Button fx:id="ph_editButton" mnemonicParsing="false" onAction="#ph_editButton_OnAction" text="Edit" />
+                              <Button fx:id="ph_deleteButton" mnemonicParsing="false" onAction="#ph_deleteButton_OnAction" text="Delete" />
+                              <Button fx:id="ph_saveButton" mnemonicParsing="false" onAction="#ph_saveButton_OnAction" text="Save" />
                           </buttons>
                         </ButtonBar>
                         <TableView fx:id="ph_TableView" layoutX="63.0" layoutY="222.0" prefHeight="336.0" prefWidth="745.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="222.0">
