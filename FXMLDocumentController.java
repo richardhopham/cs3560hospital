@@ -116,8 +116,6 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private TextField p_cityTextField;
     @FXML
-    private ChoiceBox<?> p_countryChoiceBox;
-    @FXML
     private Label p_phoneNoLabel;
     @FXML
     private Label p_insuranceProviderLabel;
@@ -215,25 +213,18 @@ public class FXMLDocumentController implements Initializable {
     private Button ph_saveButton;
     @FXML
     private TableView<?> ph_TableView;
-    
-    private void handleButtonAction(ActionEvent event) {
-        System.out.println("You clicked me!");
-        label.setText("Hello World!");
-    }
-    
+    @FXML
+    private TextField p_countryTextField;
+       
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
     }    
-
-    private void handleButton2Action(ActionEvent event) {
-        System.out.println("You clicked me, button2!");
-        label.setText("Hello World 2!");
-    }
-    
+   
     @FXML
     private void p_newButton_OnAction(ActionEvent event){
         System.out.println("You pressed PATIENT NEW BUTTON");
+        //
     }
 
     @FXML
