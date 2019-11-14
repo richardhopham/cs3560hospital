@@ -6,10 +6,25 @@
 package javafxmltestapp;
 
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ChoiceBox;
@@ -26,9 +41,7 @@ import javafx.scene.layout.BorderPane;
  * @author sebas
  */
 public class FXMLDocumentController implements Initializable {
-    
-    private Label label;
-    
+
     @FXML
     private Button p_newButton;
     @FXML
@@ -102,7 +115,7 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private DatePicker p_dateOfBirthDatePicker;
     @FXML
-    private ChoiceBox<?> p_stateChoiceBox;
+    private ChoiceBox<String> p_stateChoiceBox;
     @FXML
     private TextField p_patientIDTextField;
     @FXML
@@ -122,6 +135,8 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private Label p_policyNumberLabel;
     @FXML
+    private Label p_doctorIDLabel;
+    @FXML
     private Label p_notesLabel;
     @FXML
     private TextField p_phoneNuberTextField;
@@ -131,8 +146,6 @@ public class FXMLDocumentController implements Initializable {
     private TextField p_policyNumberTextField;
     @FXML
     private TextArea p_notesTextArea;
-    @FXML
-    private Label p_policyNumberLabel2;
     @FXML
     private TextField p_docIDTextField;
     @FXML
@@ -215,31 +228,285 @@ public class FXMLDocumentController implements Initializable {
     private TableView<?> ph_TableView;
     @FXML
     private TextField p_countryTextField;
-       
+
+    String url = "jdbc:postgresql://database-1.cakeqdu3h1oe.us-west-1.rds.amazonaws.com:5432/";
+    Properties props = new Properties();
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-    }    
-   
-    @FXML
-    private void p_newButton_OnAction(ActionEvent event){
-        System.out.println("You pressed PATIENT NEW BUTTON");
-        //
+        props.setProperty("user", "postgres");
+        props.setProperty("password", "password");
+
+        try {
+            fillStatesChoiceBox();
+        } catch (SQLException ex) {
+            Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
+    /**
+     * Sebastian Hernandez
+     *
+     * @param event
+     */
+    private void fillStatesChoiceBox() throws SQLException {
+        Connection conn = DriverManager.getConnection(url, props);
+        String sqlStatement = "SELECT * FROM public.states;";
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sqlStatement);
+
+        ArrayList<String> statesArr = new ArrayList<>();
+        while (rs.next()) {
+            String stateName = rs.getString("states_name");
+            stateName = stateName.replace('{', ' ');
+            stateName = stateName.replace('}', ' ');
+            stateName = stateName.replace('"', ' ');
+            stateName = stateName.trim();
+            statesArr.add(stateName);
+        }
+
+        ObservableList<String> stateList = FXCollections.observableList(statesArr);
+        p_stateChoiceBox.setItems(stateList);
+
+        conn.close();
+    }
+
+    /**
+     * Sebastian Hernandez
+     *
+     * @param event
+     */
+    @FXML
+    private void p_newButton_OnAction(ActionEvent event) {
+        clearPatientFields();
+        p_saveButton.setDisable(false);
+    }
+
+    /**
+     * Sebastian Hernandez
+     *
+     * @param event
+     */
     @FXML
     private void p_editButton_OnAction(ActionEvent event) {
-        System.out.println("You pressed PATIENT EDIT BUTTON");
+        if (p_patientIDTextField.getText().equals("")) {
+            Alert alert = new Alert(AlertType.ERROR, "Enter a Patient ID to edit.");
+            alert.showAndWait();
+            return;
+        }
+        String idNum = p_patientIDTextField.getText();
+
+        String url = "jdbc:postgresql://database-1.cakeqdu3h1oe.us-west-1.rds.amazonaws.com:5432/";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        props.setProperty("password", "password");
+
+        try {
+            Connection conn = DriverManager.getConnection(url, props);
+            String sqlStatement = "SELECT * FROM public.patients WHERE patient_id = " + idNum + ";";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlStatement);
+            rs.next();
+
+            p_patientIDTextField.setText(rs.getString(1));
+            p_firstNameTextField.setText(rs.getString(2));
+            p_lastNameTextField.setText(rs.getString(3));
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-d");
+            String date = rs.getString(4);
+            LocalDate localDate = LocalDate.parse(date, formatter);
+            p_dateOfBirthDatePicker.setValue(localDate);
+
+            p_addressTextField.setText(rs.getString(5));
+            p_addressSecondTextField.setText(rs.getString(6));
+            p_cityTextField.setText(rs.getString(7));
+            p_stateChoiceBox.setValue(rs.getString(8));
+            p_countryTextField.setText(rs.getString(9));
+            p_phoneNuberTextField.setText(rs.getString(10));
+            p_insuranceProviderTextField.setText(rs.getString(11));
+            p_policyNumberTextField.setText(rs.getString(12));
+            p_docIDTextField.setText(rs.getString(13));
+            p_pharmacyIDTextField.setText(rs.getString(14));
+            p_notesTextArea.setText(rs.getString(15));
+
+            conn.close();
+            p_saveButton.setDisable(false);
+            p_deleteButton.setDisable(false);
+
+        } catch (SQLException e) {
+            Alert alert = new Alert(AlertType.ERROR, "That patient ID does not exist.");
+            alert.showAndWait();
+        }
     }
 
+    /**
+     * Sebastian Hernandez
+     *
+     * @param event
+     */
     @FXML
     private void p_deleteButton_OnAction(ActionEvent event) {
-        System.out.println("You pressed PATIENT DELETE BUTTON");
+        if (p_patientIDTextField.getText().equals("")) {
+            Alert alert = new Alert(AlertType.ERROR, "Enter a Patient ID to delete.");
+            alert.showAndWait();
+            return;
+        }
+
+        String idNum = p_patientIDTextField.getText();
+        if (validPatientEntry(idNum) == true) {
+            Alert alert = new Alert(AlertType.CONFIRMATION, "Are you sure you want to delete this patient?");
+            alert.showAndWait();
+            try {
+                Connection conn = DriverManager.getConnection(url, props);
+                String sqlStatement1 = "DELETE FROM public.patients WHERE patient_id = " + idNum + ";";
+                Statement stmt = conn.createStatement();
+                stmt.executeUpdate(sqlStatement1);
+                conn.close();
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+            }
+            if (validPatientEntry(idNum) == false) {
+                alert = new Alert(AlertType.INFORMATION, "Entry deleted.");
+                alert.showAndWait();
+                clearPatientFields();
+                p_deleteButton.setDisable(true);
+            }
+        } else {
+            Alert alert = new Alert(AlertType.ERROR, "That patient ID does not exist.");
+            alert.showAndWait();
+        }
+
     }
 
+    /**
+     * Sebastian Hernandez
+     *
+     * @param event
+     */
     @FXML
     private void p_saveButton_OnAction(ActionEvent event) {
-        System.out.println("You pressed PATIENT SAVE BUTTON");
+        String idNum = p_patientIDTextField.getText();
+
+        if (validPatientEntry(idNum) == false) {
+            try {
+                Connection conn = DriverManager.getConnection(url, props);
+                String sqlStatement = "INSERT INTO public.patients(\n"
+                        + "patient_id, patient_firstname, patient_lastname, "
+                        + "patient_dateofbirth, patient_addressline1, patient_addressline2, "
+                        + "patient_city, patient_state, patient_country, "
+                        + "patient_phonenumber, patient_insuranceprovider, "
+                        + "patient_policynumber, patient_doctorid, patient_pharmacyid, "
+                        + "patient_notes)\nVALUES (";
+                sqlStatement += p_patientIDTextField.getText() + ", '";
+                sqlStatement += p_firstNameTextField.getText() + "', '";
+                sqlStatement += p_lastNameTextField.getText() + "', '";
+                sqlStatement += p_dateOfBirthDatePicker.getValue().toString() + "', '";
+                sqlStatement += p_addressTextField.getText() + "', '";
+                sqlStatement += p_addressSecondTextField.getText() + "', '";
+                sqlStatement += p_cityTextField.getText() + "', '";
+                sqlStatement += p_stateChoiceBox.getValue() + "', '";
+                sqlStatement += p_countryTextField.getText() + "', ";
+                sqlStatement += p_phoneNuberTextField.getText() + ", '";
+                sqlStatement += p_insuranceProviderTextField.getText() + "', '";
+                sqlStatement += p_policyNumberTextField.getText() + "', ";
+                sqlStatement += p_docIDTextField.getText() + ", ";
+                sqlStatement += p_pharmacyIDTextField.getText() + ", '";
+                sqlStatement += p_notesTextArea.getText() + "');";
+
+                Statement stmt = conn.createStatement();
+                stmt.executeUpdate(sqlStatement);
+                conn.close();
+                p_saveButton.setDisable(true);
+                
+                Alert alert = new Alert(AlertType.INFORMATION, "New entry saved.");
+                alert.showAndWait();
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+                Alert alert = new Alert(AlertType.ERROR, "Error saving new entry. Double check that "
+                        + "all required fields are filled out and are in correct format.");
+                alert.showAndWait();
+            }
+        } else if (validPatientEntry(idNum) == true) {
+            try {
+                Connection conn = DriverManager.getConnection(url, props);
+                String sqlStatement = "UPDATE public.patients\nSET ";
+                sqlStatement += "patient_id=" + p_patientIDTextField.getText();
+                sqlStatement += ", patient_firstname= '" + p_firstNameTextField.getText();
+                sqlStatement += "', patient_lastname='" + p_lastNameTextField.getText();
+                sqlStatement += "', patient_dateofbirth='" + p_dateOfBirthDatePicker.getValue().toString();
+                sqlStatement += "', patient_addressline1='" + p_addressTextField.getText();
+                sqlStatement += "', patient_addressline2='" + p_addressSecondTextField.getText();
+                sqlStatement += "', patient_city='" + p_cityTextField.getText();
+                sqlStatement += "', patient_state='" + p_stateChoiceBox.getValue();
+                sqlStatement += "', patient_country='" + p_countryTextField.getText();
+                sqlStatement += "', patient_phonenumber=" + p_phoneNuberTextField.getText();
+                sqlStatement += ", patient_insuranceprovider='" + p_insuranceProviderTextField.getText();
+                sqlStatement += "', patient_policynumber='" + p_policyNumberTextField.getText();
+                sqlStatement += "', patient_doctorid=" + p_docIDTextField.getText();
+                sqlStatement += ", patient_pharmacyid=" + p_pharmacyIDTextField.getText();
+                sqlStatement += ", patient_notes='" + p_notesTextArea.getText();
+                sqlStatement += "' WHERE patient_id=" + idNum + ";";
+
+                Statement stmt = conn.createStatement();
+                stmt.executeUpdate(sqlStatement);
+                conn.close();
+                p_saveButton.setDisable(true);
+                p_deleteButton.setDisable(true);
+                Alert alert = new Alert(AlertType.INFORMATION, "Edit saved.");
+                alert.showAndWait();
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+                Alert alert = new Alert(AlertType.ERROR, "Error saving changes. Double check that "
+                        + "all required fields are filled out and are in correct format.");
+                alert.showAndWait();
+            }
+        }
+    }
+
+    /**
+     * Sebastian Hernandez
+     *
+     * @param idNum
+     * @return if idNum correlates to patient_id in patients table
+     */
+    private boolean validPatientEntry(String idNum) {
+        try {
+            Connection conn = DriverManager.getConnection(url, props);
+            String sqlStatement = "SELECT * FROM Public.patients WHERE "
+                    + "patient_id=" + idNum + ";";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlStatement);
+
+            conn.close();
+
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    private void clearPatientFields() {
+        p_patientIDTextField.setText("");
+        p_firstNameTextField.setText("");
+        p_lastNameTextField.setText("");
+
+        p_dateOfBirthDatePicker.setValue(null);
+
+        p_addressTextField.setText("");
+        p_addressSecondTextField.setText("");
+        p_cityTextField.setText("");
+        p_stateChoiceBox.setValue(null);
+        p_countryTextField.setText("");
+        p_phoneNuberTextField.setText("");
+        p_insuranceProviderTextField.setText("");
+        p_policyNumberTextField.setText("");
+        p_docIDTextField.setText("");
+        p_pharmacyIDTextField.setText("");
+        p_notesTextArea.setText("");
     }
 
     @FXML
@@ -289,5 +556,5 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private void ph_saveButton_OnAction(ActionEvent event) {
     }
-    
+
 }
