@@ -91,7 +91,7 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private Button d_saveButton;
     @FXML
-    private TableView<?> d_TableView;
+    private TableView<Doctor> d_TableView;
     @FXML
     private AnchorPane patientAnchorPane;
     @FXML
@@ -242,6 +242,7 @@ public class FXMLDocumentController implements Initializable {
         try {
             fillStatesChoiceBox();
             initializePatientTableView();
+            initializeDoctorTableView();
         } catch (SQLException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -577,10 +578,93 @@ public class FXMLDocumentController implements Initializable {
 
     @FXML
     private void d_newButton_OnAction(ActionEvent event) {
+        d_saveButton.setDisable(false);
+
+        String idNum = d_doctorIDTextField.getText();
+        try {
+            Connection conn = DriverManager.getConnection(url, props);
+            String sqlStatement = "";
+            if (!validDoctorEntry(idNum)) {
+                sqlStatement = "INSERT INTO public.doctors(\n" +
+                        "doctor_id, first_name, office_phone_1, office_phone_2, " +
+                        "email, fax_number, notes, last_name) \n" +
+                        "VALUES(" + d_doctorIDTextField.getText() + ", '" + d_firstNameTextField.getText() + "', '" +
+                        d_officePhoneNo1TextField.getText() + "', '" +
+                        d_officePhoneNo2TextField.getText() + "', '" + d_emailAddressTextField.getText() + "', '" +
+                        d_faxNoTextField.getText() + "', '" + d_notesTextField.getText() + "', '" +
+                        d_lastNameTextField.getText()+ "');";
+            } else {
+                sqlStatement = "UPDATE public.doctors \nSET " +
+                        "doctor_id = " + d_doctorIDTextField.getText() + ", " +
+                        "first_name = '" + d_firstNameTextField.getText() + "', " +
+                        "last_name = '" + d_lastNameTextField.getText() + "', " +
+                        "office_phone_1 = '" + d_officePhoneNo1TextField.getText() + "', " +
+                        "office_phone_2 = '" + d_officePhoneNo2TextField.getText() + "', " +
+                        "email = '" + d_emailAddressTextField.getText() + "', " +
+                        "fax_number = '" + d_faxNoTextField.getText() + "', " +
+                        "notes = '" + d_notesTextField.getText() + "' WHERE doctor_id = " + idNum + ";";
+            }
+
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(sqlStatement);
+            conn.close();
+            d_saveButton.setDisable(true);
+            updateDoctorTable();
+            clearDoctorFields();
+            Alert alert = new Alert(AlertType.INFORMATION, "New entry saved.");
+            alert.showAndWait();
+
+
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+            Alert alert = new Alert(AlertType.ERROR, "Error saving new entry. Double check that "
+                    + "all required fields are filled out and are in correct format.");
+            alert.showAndWait();
+        }
     }
 
     @FXML
     private void d_editButton_OnAction(ActionEvent event) {
+        String idNum;
+        try {
+            idNum = d_TableView.getSelectionModel().getSelectedItem().getDoctorID();
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR, "Select a Doctor to edit.");
+            alert.showAndWait();
+            return;
+        }
+
+
+        String url = "jdbc:postgresql://database-1.cakeqdu3h1oe.us-west-1.rds.amazonaws.com:5432/";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        props.setProperty("password", "password");
+
+        try {
+            Connection conn = DriverManager.getConnection(url, props);
+            String sqlStatement = "SELECT * FROM public.doctor WHERE doctor_id = " + idNum + ";";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlStatement);
+            rs.next();
+
+            d_doctorIDTextField.setText(rs.getString(1));
+            d_firstNameTextField.setText(rs.getString(2));
+            d_lastNameTextField.setText(rs.getString(3));
+
+            d_officePhoneNo1TextField.setText(rs.getString(4));
+            d_officePhoneNo2TextField.setText(rs.getString(5));
+            d_emailAddressTextField.setText(rs.getString(6));
+            d_faxNoTextField.setText(rs.getString(7));
+            d_notesTextField.setText(rs.getString(8));
+
+            conn.close();
+            d_saveButton.setDisable(false);
+            d_deleteButton.setDisable(false);
+
+        } catch (SQLException e) {
+            Alert alert = new Alert(AlertType.ERROR, "That doctor ID does not exist.");
+            alert.showAndWait();
+        }
     }
 
     @FXML
@@ -589,6 +673,95 @@ public class FXMLDocumentController implements Initializable {
 
     @FXML
     private void d_saveButton_OnAction(ActionEvent event) {
+
+
+    }
+
+    private void clearDoctorFields(){
+        d_doctorIDTextField.setText("");
+        d_firstNameTextField.setText("");
+        d_lastNameTextField.setText("");
+        d_doctorIDTextField.setText("");
+        d_emailAddressTextField.setText("");
+        d_officePhoneNo1TextField.setText("");
+        d_faxNoTextField.setText("");
+        d_officePhoneNo2TextField.setText("");
+        d_notesTextField.setText("");
+    }
+
+    private void initializeDoctorTableView() throws SQLException{
+        TableColumn idCol = new TableColumn("Doctor ID");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("doctorID"));
+
+        TableColumn fnameCol = new TableColumn("First Name");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+
+        TableColumn lnameCol = new TableColumn("Last Name");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+
+        TableColumn phone1Col = new TableColumn("Office Phone 1");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("phone1"));
+
+        TableColumn phone2Col = new TableColumn("Office Phone 2");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("phone2"));
+
+        TableColumn faxNoCol = new TableColumn("Fax Number");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("faxNo"));
+
+        TableColumn emailCol = new TableColumn("Email Address");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+
+        TableColumn notesCol = new TableColumn("Notes");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("notes"));
+
+        d_TableView.getColumns().addAll(idCol, fnameCol, lnameCol, phone1Col,
+                phone2Col, faxNoCol, emailCol, notesCol);
+
+        updateDoctorTable();
+
+    }
+
+    private void updateDoctorTable() throws SQLException{
+        d_TableView.getItems().clear();
+
+        Connection conn = DriverManager.getConnection(url, props);
+        String sqlStatement = "SELECT * FROM public.doctors ORDER BY doctor_id;";
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sqlStatement);
+        while(rs.next()){
+            Doctor doctor = new Doctor();
+            doctor.setDoctorID(rs.getString(1));
+            doctor.setFirstName(rs.getString(2));
+            doctor.setPhone1(rs.getString(3));
+            doctor.setPhone2(rs.getString(4));
+            doctor.setEmail(rs.getString(5));
+            doctor.setFaxNo(rs.getString(6));
+            doctor.setNotes(rs.getString(7));
+            doctor.setLastName(rs.getString(8));
+            d_TableView.getItems().add(doctor);
+        }
+        conn.close();
+
+    }
+
+    private boolean validDoctorEntry(String idNum) {
+        try {
+            Connection conn = DriverManager.getConnection(url, props);
+            String sqlStatement = "SELECT * FROM Public.doctors WHERE "
+                    + "doctor_id=" + idNum + ";";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlStatement);
+
+            conn.close();
+
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     @FXML
