@@ -30,9 +30,11 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 
@@ -161,7 +163,7 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private Button p_saveButton;
     @FXML
-    private TableView<?> p_TableView;
+    private TableView<Patient> p_TableView;
     @FXML
     private AnchorPane appointmentAnchorPane;
     @FXML
@@ -239,16 +241,12 @@ public class FXMLDocumentController implements Initializable {
 
         try {
             fillStatesChoiceBox();
+            initializePatientTableView();
         } catch (SQLException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    /**
-     * Sebastian Hernandez
-     *
-     * @param event
-     */
     private void fillStatesChoiceBox() throws SQLException {
         Connection conn = DriverManager.getConnection(url, props);
         String sqlStatement = "SELECT * FROM public.states;";
@@ -271,30 +269,25 @@ public class FXMLDocumentController implements Initializable {
         conn.close();
     }
 
-    /**
-     * Sebastian Hernandez
-     *
-     * @param event
-     */
     @FXML
     private void p_newButton_OnAction(ActionEvent event) {
         clearPatientFields();
         p_saveButton.setDisable(false);
     }
 
-    /**
-     * Sebastian Hernandez
-     *
-     * @param event
-     */
     @FXML
     private void p_editButton_OnAction(ActionEvent event) {
-        if (p_patientIDTextField.getText().equals("")) {
-            Alert alert = new Alert(AlertType.ERROR, "Enter a Patient ID to edit.");
+        //if (p_patientIDTextField.getText().equals("")) {
+        String idNum;
+        try {
+            idNum = p_TableView.getSelectionModel().getSelectedItem().getPatientID();
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR, "Select a Patient to edit.");
             alert.showAndWait();
             return;
         }
-        String idNum = p_patientIDTextField.getText();
+
+        //String idNum = p_patientIDTextField.getText();
 
         String url = "jdbc:postgresql://database-1.cakeqdu3h1oe.us-west-1.rds.amazonaws.com:5432/";
         Properties props = new Properties();
@@ -339,15 +332,11 @@ public class FXMLDocumentController implements Initializable {
         }
     }
 
-    /**
-     * Sebastian Hernandez
-     *
-     * @param event
-     */
     @FXML
     private void p_deleteButton_OnAction(ActionEvent event) {
         if (p_patientIDTextField.getText().equals("")) {
-            Alert alert = new Alert(AlertType.ERROR, "Enter a Patient ID to delete.");
+            Alert alert = new Alert(AlertType.ERROR, "Patient must be selected"
+                    + " and in edit mode to be deleted.");
             alert.showAndWait();
             return;
         }
@@ -378,11 +367,6 @@ public class FXMLDocumentController implements Initializable {
 
     }
 
-    /**
-     * Sebastian Hernandez
-     *
-     * @param event
-     */
     @FXML
     private void p_saveButton_OnAction(ActionEvent event) {
         String idNum = p_patientIDTextField.getText();
@@ -418,8 +402,10 @@ public class FXMLDocumentController implements Initializable {
                 conn.close();
                 p_saveButton.setDisable(true);
                 
+                updatePatientTable();
+
                 Alert alert = new Alert(AlertType.INFORMATION, "New entry saved.");
-                alert.showAndWait();
+                alert.showAndWait();                
             } catch (SQLException e) {
                 System.out.println(e.toString());
                 Alert alert = new Alert(AlertType.ERROR, "Error saving new entry. Double check that "
@@ -452,6 +438,9 @@ public class FXMLDocumentController implements Initializable {
                 conn.close();
                 p_saveButton.setDisable(true);
                 p_deleteButton.setDisable(true);
+                
+                updatePatientTable();
+                
                 Alert alert = new Alert(AlertType.INFORMATION, "Edit saved.");
                 alert.showAndWait();
             } catch (SQLException e) {
@@ -463,12 +452,89 @@ public class FXMLDocumentController implements Initializable {
         }
     }
 
-    /**
-     * Sebastian Hernandez
-     *
-     * @param idNum
-     * @return if idNum correlates to patient_id in patients table
-     */
+    private void initializePatientTableView() throws SQLException {
+
+        TableColumn idCol = new TableColumn("Patient ID");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("patientID"));
+
+        TableColumn fnameCol = new TableColumn("First Name");
+        fnameCol.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+
+        TableColumn lnameCol = new TableColumn("Last Name");
+        lnameCol.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+
+        TableColumn dobCol = new TableColumn("Date of Birth");
+        dobCol.setCellValueFactory(new PropertyValueFactory<>("dateOfBirth"));
+
+        TableColumn ad1Col = new TableColumn("Address");
+        ad1Col.setCellValueFactory(new PropertyValueFactory<>("addressLine1"));
+
+        TableColumn ad2Col = new TableColumn("Address Line 2");
+        ad2Col.setCellValueFactory(new PropertyValueFactory<>("addressLine2"));
+
+        TableColumn cityCol = new TableColumn("City");
+        cityCol.setCellValueFactory(new PropertyValueFactory<>("city"));
+
+        TableColumn stateCol = new TableColumn("State");
+        stateCol.setCellValueFactory(new PropertyValueFactory<>("state"));
+
+        TableColumn countryCol = new TableColumn("Country");
+        countryCol.setCellValueFactory(new PropertyValueFactory<>("country"));
+
+        TableColumn phoneCol = new TableColumn("Phone Number");
+        phoneCol.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
+
+        TableColumn insurCol = new TableColumn("Insurance Provider");
+        insurCol.setCellValueFactory(new PropertyValueFactory<>("insuranceProvider"));
+
+        TableColumn policyCol = new TableColumn("Policy Number");
+        policyCol.setCellValueFactory(new PropertyValueFactory<>("policyNumber"));
+
+        TableColumn docIDCol = new TableColumn("Primary Doctor ID");
+        docIDCol.setCellValueFactory(new PropertyValueFactory<>("doctorID"));
+
+        TableColumn pharmIDCol = new TableColumn("Pharmacy ID");
+        pharmIDCol.setCellValueFactory(new PropertyValueFactory<>("pharmacyID"));
+
+        p_TableView.getColumns().addAll(idCol, fnameCol, lnameCol, dobCol,
+                ad1Col, ad2Col, cityCol, stateCol, countryCol, phoneCol,
+                insurCol, policyCol, docIDCol, pharmIDCol);
+
+        updatePatientTable();
+    }
+
+    private void updatePatientTable() throws SQLException {
+        p_TableView.getItems().clear();
+
+        Connection conn = DriverManager.getConnection(url, props);
+        String sqlStatement = "SELECT * FROM public.patients ORDER BY patient_id;";
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sqlStatement);
+
+        while (rs.next()) {
+            Patient patient = new Patient();
+            patient.setPatientID(rs.getString(1));
+            patient.setFirstName(rs.getString(2));
+            patient.setLastName(rs.getString(3));
+
+            patient.setDateOfBirth(rs.getString(4));
+
+            patient.setAddressLine1(rs.getString(5));
+            patient.setAddressLine2(rs.getString(6));
+            patient.setCity(rs.getString(7));
+            patient.setState(rs.getString(8));
+            patient.setCountry(rs.getString(9));
+            patient.setPhoneNumber(rs.getString(10));
+            patient.setInsuranceProvider(rs.getString(11));
+            patient.setPolicyNumber(rs.getString(12));
+            patient.setDoctorID(rs.getString(13));
+            patient.setPharmacyID(rs.getString(14));
+
+            p_TableView.getItems().add(patient);
+        }
+        conn.close();
+    }
+
     private boolean validPatientEntry(String idNum) {
         try {
             Connection conn = DriverManager.getConnection(url, props);
