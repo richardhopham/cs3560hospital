@@ -130,7 +130,7 @@
                               <Button fx:id="p_saveButton" disable="true" mnemonicParsing="false" onAction="#p_saveButton_OnAction" text="Save" />
                           </buttons>
                         </ButtonBar>
-                        <TableView fx:id="p_TableView" layoutX="68.0" layoutY="315.0" prefHeight="210.0" prefWidth="708.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="351.0">
+                        <TableView fx:id="p_TableView" layoutX="68.0" layoutY="315.0" prefHeight="210.0" prefWidth="708.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="351.0">
                            <columnResizePolicy>
                            </columnResizePolicy>
                         </TableView>
