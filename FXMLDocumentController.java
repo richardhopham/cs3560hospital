@@ -741,7 +741,6 @@ public class FXMLDocumentController implements Initializable {
                 phone2Col, faxNoCol, emailCol, notesCol);
 
         updateDoctorTable();
-
     }
 
     private void updateDoctorTable() throws SQLException{

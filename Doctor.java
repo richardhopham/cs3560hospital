@@ -70,6 +70,12 @@ public class Doctor {
         this.notes = notes;
     }
 
+	@Override
+	public String toString() {
+		return "Doctor [doctorID=" + doctorID + ", firstName=" + firstName + ", lastName=" + lastName + ", phone1="
+				+ phone1 + ", phone2=" + phone2 + ", email=" + email + ", faxNo=" + faxNo + ", notes=" + notes + "]";
+	}
+
 
 
 }
