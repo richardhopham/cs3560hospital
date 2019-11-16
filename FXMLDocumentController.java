@@ -7,7 +7,6 @@ package javafxmltestapp;
 
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -475,7 +474,8 @@ public class FXMLDocumentController implements Initializable {
         }
     }
 
-    private void initializePatientTableView() throws SQLException {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	private void initializePatientTableView() throws SQLException {
 
         TableColumn idCol = new TableColumn("Patient ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("patientID"));
@@ -711,7 +711,8 @@ public class FXMLDocumentController implements Initializable {
         d_notesTextField.setText("");
     }
 
-    private void initializeDoctorTableView() throws SQLException{
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	private void initializeDoctorTableView() throws SQLException{
         TableColumn idCol = new TableColumn("Doctor ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("doctorID"));
 
@@ -963,7 +964,7 @@ public class FXMLDocumentController implements Initializable {
     	}
     }
 
-    @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initializeAppointmentTableView() throws SQLException {
     	TableColumn patientIDCol = new TableColumn("Patient ID");
     	patientIDCol.setCellValueFactory(new PropertyValueFactory<>("patientID"));
@@ -986,7 +987,7 @@ public class FXMLDocumentController implements Initializable {
     	a_TableView.getItems().clear();
     	
         Connection conn = DriverManager.getConnection(url, props);
-        String sqlStatement = "SELECT * FROM public.appointments ORDER BY date;";
+        String sqlStatement = "SELECT * FROM public.appointments ORDER BY date	;";
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery(sqlStatement);
         
