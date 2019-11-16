@@ -141,7 +141,7 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private Label p_notesLabel;
     @FXML
-    private TextField p_phoneNuberTextField;
+    private TextField p_phoneNumberTextField;
     @FXML
     private TextField p_insuranceProviderTextField;
     @FXML
@@ -337,7 +337,7 @@ public class FXMLDocumentController implements Initializable {
             p_cityTextField.setText(rs.getString(7));
             p_stateChoiceBox.setValue(rs.getString(8));
             p_countryTextField.setText(rs.getString(9));
-            p_phoneNuberTextField.setText(rs.getString(10));
+            p_phoneNumberTextField.setText(rs.getString(10));
             p_insuranceProviderTextField.setText(rs.getString(11));
             p_policyNumberTextField.setText(rs.getString(12));
             p_docIDTextField.setText(rs.getString(13));
@@ -412,7 +412,7 @@ public class FXMLDocumentController implements Initializable {
                 sqlStatement += p_cityTextField.getText() + "', '";
                 sqlStatement += p_stateChoiceBox.getValue() + "', '";
                 sqlStatement += p_countryTextField.getText() + "', ";
-                sqlStatement += p_phoneNuberTextField.getText() + ", '";
+                sqlStatement += p_phoneNumberTextField.getText() + ", '";
                 sqlStatement += p_insuranceProviderTextField.getText() + "', '";
                 sqlStatement += p_policyNumberTextField.getText() + "', ";
                 sqlStatement += p_docIDTextField.getText() + ", ";
@@ -447,7 +447,7 @@ public class FXMLDocumentController implements Initializable {
                 sqlStatement += "', patient_city='" + p_cityTextField.getText();
                 sqlStatement += "', patient_state='" + p_stateChoiceBox.getValue();
                 sqlStatement += "', patient_country='" + p_countryTextField.getText();
-                sqlStatement += "', patient_phonenumber=" + p_phoneNuberTextField.getText();
+                sqlStatement += "', patient_phonenumber=" + p_phoneNumberTextField.getText();
                 sqlStatement += ", patient_insuranceprovider='" + p_insuranceProviderTextField.getText();
                 sqlStatement += "', patient_policynumber='" + p_policyNumberTextField.getText();
                 sqlStatement += "', patient_doctorid=" + p_docIDTextField.getText();
@@ -590,7 +590,7 @@ public class FXMLDocumentController implements Initializable {
         p_cityTextField.setText("");
         p_stateChoiceBox.setValue(null);
         p_countryTextField.setText("");
-        p_phoneNuberTextField.setText("");
+        p_phoneNumberTextField.setText("");
         p_insuranceProviderTextField.setText("");
         p_policyNumberTextField.setText("");
         p_docIDTextField.setText("");
