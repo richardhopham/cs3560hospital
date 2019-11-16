@@ -130,7 +130,7 @@
                               <Button fx:id="p_saveButton" disable="true" mnemonicParsing="false" onAction="#p_saveButton_OnAction" text="Save" />
                           </buttons>
                         </ButtonBar>
-                        <TableView fx:id="p_TableView" layoutX="68.0" layoutY="315.0" prefHeight="210.0" prefWidth="708.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="351.0">
+                        <TableView fx:id="p_TableView" layoutX="68.0" layoutY="315.0" prefHeight="210.0" prefWidth="708.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="351.0">
                            <columnResizePolicy>
                            </columnResizePolicy>
                         </TableView>
@@ -144,16 +144,14 @@
                      <children>
                         <AnchorPane fx:id="appointmentInfoAnchorPane" layoutX="14.0" layoutY="10.0" prefHeight="143.0" prefWidth="708.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                            <children>
-                              <Label fx:id="appointmentPatientIDLabel" layoutY="4.0" text="Patient ID: *" />
-                              <TextField layoutX="69.0" />
-                              <Label layoutY="34.0" text="Doctor ID: *" />
-                              <TextField layoutX="69.0" layoutY="30.0" />
-                              <DatePicker fx:id="appointmentDatePicker" layoutX="69.0" layoutY="60.0" />
-                              <Label layoutY="65.0" text="Date: *" />
-                              <Label layoutX="275.0" layoutY="4.0" text="Description: *" />
-                              <TextArea layoutX="354.0" layoutY="-4.0" prefHeight="138.0" prefWidth="200.0" AnchorPane.topAnchor="0.0" />
-                              <Label layoutY="94.0" text="Type: *" />
-                              <ChoiceBox layoutX="69.0" layoutY="90.0" prefWidth="150.0" />
+                              <Label fx:id="a_patientIDLabel" layoutY="4.0" text="Patient ID: *" />
+                              <TextField fx:id="a_patientIDTextField" layoutX="69.0" />
+                              <Label fx:id="a_doctorIDLabel" layoutY="34.0" text="Doctor ID: *" />
+                              <TextField fx:id="a_doctorIDTextField" layoutX="69.0" layoutY="30.0" />
+                              <DatePicker fx:id="a_dateDatePicker" layoutX="69.0" layoutY="60.0" />
+                              <Label fx:id="a_dateLabel" layoutY="65.0" text="Date: *" />
+                              <Label fx:id="a_descriptionLabel" layoutX="275.0" layoutY="4.0" text="Description: *" />
+                              <TextArea fx:id="a_descriptionTextArea" layoutX="354.0" layoutY="-4.0" prefHeight="138.0" prefWidth="200.0" AnchorPane.topAnchor="0.0" />
                            </children>
                         </AnchorPane>
                         <ButtonBar fx:id="a_appointmentButtonBar" layoutY="153.0" prefHeight="40.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="153.0">

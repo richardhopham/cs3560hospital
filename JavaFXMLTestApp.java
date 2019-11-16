@@ -25,6 +25,7 @@ public class JavaFXMLTestApp extends Application {
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
+        stage.setTitle("Hospital Management System");
         stage.show();
     }
 
@@ -54,7 +55,6 @@ public class JavaFXMLTestApp extends Application {
      * @throws SQLException
      */
     public static void main(String[] args) throws SQLException {
-        connect();
         launch(args);
     }
 

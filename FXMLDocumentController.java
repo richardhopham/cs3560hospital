@@ -7,6 +7,7 @@ package javafxmltestapp;
 
 import java.net.URL;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -169,9 +170,29 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private AnchorPane appointmentInfoAnchorPane;
     @FXML
-    private Label appointmentPatientIDLabel;
+    private Label a_patientIDLabel;
+    
     @FXML
-    private DatePicker appointmentDatePicker;
+    private TextField a_patientIDTextField;
+    
+    @FXML 
+    private Label a_doctorIDLabel;
+    
+    @FXML
+    private TextField a_doctorIDTextField;
+    
+    @FXML
+    private Label a_dateLabel;
+    
+    @FXML
+    private DatePicker a_dateDatePicker;
+    
+    @FXML
+    private Label a_descriptionLabel;
+    
+    @FXML
+    private TextArea a_descriptionTextArea;
+    
     @FXML
     private ButtonBar a_appointmentButtonBar;
     @FXML
@@ -183,7 +204,7 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private Button a_saveButton;
     @FXML
-    private TableView<?> a_TableView;
+    private TableView<Appointment> a_TableView;
     @FXML
     private TextField ph_pharmacyIDTextField;
     @FXML
@@ -243,6 +264,7 @@ public class FXMLDocumentController implements Initializable {
             fillStatesChoiceBox();
             initializePatientTableView();
             initializeDoctorTableView();
+            initializeAppointmentTableView();
         } catch (SQLException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -766,24 +788,232 @@ public class FXMLDocumentController implements Initializable {
 
     @FXML
     private void a_newButton_OnAction(ActionEvent event) {
+    	clearAppointmentFields();
+    	a_saveButton.setDisable(false);
     }
 
     @FXML
     private void a_editButton_OnAction(ActionEvent event) {
+    	String patientIDNum;
+    	String doctorIDNum;
+    	String dateNum; 
+    	try {
+    		patientIDNum = a_TableView.getSelectionModel().getSelectedItem().getPatientID();
+    		doctorIDNum = a_TableView.getSelectionModel().getSelectedItem().getDoctorID();
+    		dateNum = a_TableView.getSelectionModel().getSelectedItem().getDate();
+    	} catch(Exception e) {
+    		Alert alert = new Alert(AlertType.ERROR, "Select an Appointment to edit.");
+    		alert.showAndWait();
+    		return;
+    	}
+    	
+        String url = "jdbc:postgresql://database-1.cakeqdu3h1oe.us-west-1.rds.amazonaws.com:5432/";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        props.setProperty("password", "password");
+    	
+    	try {
+            Connection conn = DriverManager.getConnection(url, props);
+            String sqlStatement = "SELECT * FROM public.appointments WHERE patient_id = " + patientIDNum + " AND doctor_id = " + doctorIDNum + " AND date = (DATE '" + dateNum + "');";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlStatement);
+            rs.next();
+            
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-d");
+            String date = rs.getString(1);
+            LocalDate localdate = LocalDate.parse(date, formatter);
+            a_dateDatePicker.setValue(localdate);
+            
+            a_patientIDTextField.setText(rs.getString(2));
+            a_descriptionTextArea.setText(rs.getString(3));
+            a_doctorIDTextField.setText(rs.getString(4));
+            
+            conn.close();
+            a_saveButton.setDisable(false);
+            a_deleteButton.setDisable(false);
+            
+            
+    	} catch(SQLException e) {
+    		Alert alert = new Alert(AlertType.ERROR, "That Appointment does not exist");
+    		alert.showAndWait();
+    	}
     }
 
     @FXML
-    private void a_deleteButton_OnAction(ActionEvent event) {
+    private void a_deleteButton_OnAction(ActionEvent event) throws SQLException {
+    	if(a_patientIDTextField.getText().equals("") || a_doctorIDTextField.getText().equals("") || a_dateDatePicker.getValue().equals(null)) {
+            Alert alert = new Alert(AlertType.ERROR, "Appointment must be selected"
+                    + " and in edit mode to be deleted.");
+            alert.showAndWait();
+            return;
+    	}
+    	
+    	String patientIDNum = a_patientIDTextField.getText();
+    	String doctorIDNum = a_doctorIDTextField.getText();
+    	String dateNum = a_dateDatePicker.getValue().toString();
+    	
+    	if(validAppointmentEntry(patientIDNum, doctorIDNum, dateNum)) {
+    		Alert alert = new Alert(AlertType.CONFIRMATION, "Are you sure you want to delete this appointment?");
+    		alert.showAndWait();
+    		try {
+    			Connection conn = DriverManager.getConnection(url, props);
+    			String sqlStatement = "DELETE FROM public.appointments WHERE patient_ID = " + patientIDNum 
+    					+ "AND doctor_id = " + doctorIDNum + "AND date = (DATE '" + dateNum + "');";
+    			Statement stmt = conn.createStatement();
+    			stmt.executeUpdate(sqlStatement);
+    			conn.close();
+    		} catch(SQLException e) {
+    			System.out.println(e.toString());
+    		}
+    		if(validAppointmentEntry(patientIDNum, doctorIDNum, dateNum)) {
+    			alert = new Alert(AlertType.INFORMATION, "Entry deleted.");
+    			alert.showAndWait();
+    			clearAppointmentFields();
+    			a_deleteButton.setDisable(true);
+    		}
+    	} else {
+    		Alert alert = new Alert(AlertType.ERROR, "That appointment does not exist.");
+    		alert.showAndWait();
+    	}
+    	updateAppointmentTable();
     }
 
+    private boolean validAppointmentEntry(String patientID, String doctorID, String date) {
+        try {
+            Connection conn = DriverManager.getConnection(url, props);
+            String sqlStatement = "SELECT * FROM public.appointments WHERE patient_id = " 
+            + patientID + " AND doctor_id = " + doctorID + " AND date = (DATE '" + date + "');";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlStatement);
+
+            conn.close();
+
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+    
     @FXML
     private void a_saveButton_OnAction(ActionEvent event) {
+    	String patientIDNum = a_patientIDTextField.getText();
+    	String doctorIDNum = a_doctorIDTextField.getText();
+    	String dateNum = a_dateDatePicker.getValue().toString();
+    	
+    	if(!validAppointmentEntry(patientIDNum, doctorIDNum, dateNum)) {
+    		try {
+                Connection conn = DriverManager.getConnection(url, props);
+                String sqlStatement = "INSERT INTO public.appointments(date, patient_id, reason_for_appointment, doctor_id) VALUES ('";
+                
+                sqlStatement += a_dateDatePicker.getValue().toString() + "', ";
+                sqlStatement += a_patientIDTextField.getText() + ", '"; 
+                sqlStatement += a_descriptionTextArea.getText() + "', ";
+                sqlStatement += a_doctorIDTextField.getText();
+                sqlStatement += ");";
+                
+                Statement stmt = conn.createStatement();
+                stmt.executeUpdate(sqlStatement);
+                conn.close();
+                a_saveButton.setDisable(true);
+                
+                updateAppointmentTable();
+                
+                Alert alert = new Alert(AlertType.INFORMATION, "New entry saved.");
+                alert.showAndWait(); 
+
+    		}  catch (SQLException e) {
+                System.out.println(e.toString());
+                Alert alert = new Alert(AlertType.ERROR, "Error saving new entry. Double check that "
+                        + "all required fields are filled out and are in correct format.");
+                alert.showAndWait();
+            }
+    	} else {
+    		try {
+    			Connection conn = DriverManager.getConnection(url, props);
+    			String sqlStatement = "UPDATE public.appointments SET ";
+    			sqlStatement += "date = (DATE '" + a_dateDatePicker.getValue().toString() + "'), ";
+    			sqlStatement += "patient_id = " + a_patientIDTextField.getText() + ", ";
+    			sqlStatement += "reason_for_appointment = '" + a_descriptionTextArea.getText() + "', ";
+    			sqlStatement += "doctor_id = " + a_doctorIDTextField.getText();
+    			sqlStatement += " WHERE ";
+    			sqlStatement += "patient_id = " + patientIDNum;
+    			sqlStatement += " AND doctor_id = " + doctorIDNum;
+    			sqlStatement += " AND date = (DATE '" + dateNum + "');";
+    			
+    			Statement stmt = conn.createStatement();
+    			stmt.executeUpdate(sqlStatement);
+    			conn.close();
+    			a_saveButton.setDisable(true);
+    			a_deleteButton.setDisable(true);
+    			
+    			updateAppointmentTable();
+    			
+                Alert alert = new Alert(AlertType.INFORMATION, "Edit saved.");
+                alert.showAndWait();
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+                Alert alert = new Alert(AlertType.ERROR, "Error saving changes. Double check that "
+                        + "all required fields are filled out and are in correct format.");
+                alert.showAndWait();
+            }
+    	}
     }
 
+    @SuppressWarnings({ "rawtypes", "unused", "unchecked" })
+	private void initializeAppointmentTableView() throws SQLException {
+    	TableColumn patientIDCol = new TableColumn("Patient ID");
+    	patientIDCol.setCellValueFactory(new PropertyValueFactory<>("patientID"));
+    	
+    	TableColumn doctorIDCol = new TableColumn("Doctor ID");
+    	doctorIDCol.setCellValueFactory(new PropertyValueFactory<>("doctorID"));
+    	
+    	TableColumn dateCol = new TableColumn("Date");
+    	dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
+    	
+    	TableColumn descriptionCol = new TableColumn("Description");
+    	descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
+    	
+    	a_TableView.getColumns().addAll(patientIDCol, doctorIDCol, dateCol, descriptionCol);
+    	
+    	updateAppointmentTable();
+    }
+    
+    private void updateAppointmentTable() throws SQLException {
+    	a_TableView.getItems().clear();
+    	
+        Connection conn = DriverManager.getConnection(url, props);
+        String sqlStatement = "SELECT * FROM public.appointments ORDER BY date;";
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sqlStatement);
+        
+        while(rs.next()) {
+        	Appointment app = new Appointment();
+        	app.setDate(rs.getString(1));
+        	app.setPatientID(rs.getString(2));
+        	app.setDescription(rs.getString(3));
+        	app.setDoctorID(rs.getString(4));
+        	
+        	a_TableView.getItems().add(app);
+        }
+        conn.close();
+    }
+    
+    private void clearAppointmentFields() {
+    	a_patientIDTextField.setText("");
+    	a_doctorIDTextField.setText("");
+    	a_dateDatePicker.setValue(null);
+    	a_descriptionTextArea.setText("");
+    }
+    
+    
     @FXML
     private void ph_newButton_OnAction(ActionEvent event) {
     }
-
+    
     @FXML
     private void ph_editButton_OnAction(ActionEvent event) {
     }
