@@ -601,7 +601,89 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private void d_newButton_OnAction(ActionEvent event) {
         d_saveButton.setDisable(false);
+        clearDoctorFields();
+    }
 
+    @FXML
+    private void d_editButton_OnAction(ActionEvent event) {
+        String idNum;
+        try {
+            idNum = d_TableView.getSelectionModel().getSelectedItem().getDoctorID();
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR, "Select a Doctor to edit.");
+            alert.showAndWait();
+            return;
+        }
+
+
+//        String url = "jdbc:postgresql://database-1.cakeqdu3h1oe.us-west-1.rds.amazonaws.com:5432/";
+//        Properties props = new Properties();
+//        props.setProperty("user", "postgres");
+//        props.setProperty("password", "password");
+
+        try {
+            Connection conn = DriverManager.getConnection(url, props);
+            String sqlStatement = "SELECT * FROM public.doctors WHERE doctor_id = " + idNum + ";";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlStatement);
+            rs.next();
+
+            d_doctorIDTextField.setText(rs.getString(1));
+            d_firstNameTextField.setText(rs.getString(2));
+
+            d_officePhoneNo1TextField.setText(rs.getString(3));
+            d_officePhoneNo2TextField.setText(rs.getString(4));
+            d_emailAddressTextField.setText(rs.getString(5));
+            d_faxNoTextField.setText(rs.getString(6));
+            d_notesTextField.setText(rs.getString(7));
+            d_lastNameTextField.setText(rs.getString(8));
+
+            conn.close();
+            d_saveButton.setDisable(false);
+            d_deleteButton.setDisable(false);
+
+        } catch (SQLException e) {
+            Alert alert = new Alert(AlertType.ERROR, "That doctor ID does not exist.");
+            alert.showAndWait();
+        }
+    }
+
+    @FXML
+    private void d_deleteButton_OnAction(ActionEvent event) {
+        String idNum = d_doctorIDTextField.getText();
+        if(idNum.equals("")){
+            Alert alert = new Alert(AlertType.ERROR, "Doctor must be selected"
+                    + " and in edit mode to be deleted.");
+            alert.showAndWait();
+            return;
+        }
+        if(validDoctorEntry(idNum)==true){
+            Alert alert = new Alert(AlertType.CONFIRMATION, "Are you sure you want to delete this doctor?");
+            alert.showAndWait();
+            try {
+                Connection conn = DriverManager.getConnection(url, props);
+                String sqlStatement1 = "DELETE FROM public.doctors WHERE doctor_id = " + idNum + ";";
+                Statement stmt = conn.createStatement();
+                stmt.executeUpdate(sqlStatement1);
+                conn.close();
+                updateDoctorTable();
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+            }
+            if (validDoctorEntry(idNum) == false) {
+                alert = new Alert(AlertType.INFORMATION, "Entry deleted.");
+                alert.showAndWait();
+                clearDoctorFields();
+                d_deleteButton.setDisable(true);
+            }
+        } else {
+            Alert alert = new Alert(AlertType.ERROR, "That doctor ID does not exist.");
+            alert.showAndWait();
+        }
+    }
+
+    @FXML
+    private void d_saveButton_OnAction(ActionEvent event) {
         String idNum = d_doctorIDTextField.getText();
         try {
             Connection conn = DriverManager.getConnection(url, props);
@@ -643,59 +725,6 @@ public class FXMLDocumentController implements Initializable {
                     + "all required fields are filled out and are in correct format.");
             alert.showAndWait();
         }
-    }
-
-    @FXML
-    private void d_editButton_OnAction(ActionEvent event) {
-        String idNum;
-        try {
-            idNum = d_TableView.getSelectionModel().getSelectedItem().getDoctorID();
-        } catch (Exception e) {
-            Alert alert = new Alert(AlertType.ERROR, "Select a Doctor to edit.");
-            alert.showAndWait();
-            return;
-        }
-
-
-        String url = "jdbc:postgresql://database-1.cakeqdu3h1oe.us-west-1.rds.amazonaws.com:5432/";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        props.setProperty("password", "password");
-
-        try {
-            Connection conn = DriverManager.getConnection(url, props);
-            String sqlStatement = "SELECT * FROM public.doctor WHERE doctor_id = " + idNum + ";";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sqlStatement);
-            rs.next();
-
-            d_doctorIDTextField.setText(rs.getString(1));
-            d_firstNameTextField.setText(rs.getString(2));
-            d_lastNameTextField.setText(rs.getString(3));
-
-            d_officePhoneNo1TextField.setText(rs.getString(4));
-            d_officePhoneNo2TextField.setText(rs.getString(5));
-            d_emailAddressTextField.setText(rs.getString(6));
-            d_faxNoTextField.setText(rs.getString(7));
-            d_notesTextField.setText(rs.getString(8));
-
-            conn.close();
-            d_saveButton.setDisable(false);
-            d_deleteButton.setDisable(false);
-
-        } catch (SQLException e) {
-            Alert alert = new Alert(AlertType.ERROR, "That doctor ID does not exist.");
-            alert.showAndWait();
-        }
-    }
-
-    @FXML
-    private void d_deleteButton_OnAction(ActionEvent event) {
-    }
-
-    @FXML
-    private void d_saveButton_OnAction(ActionEvent event) {
-
 
     }
 
@@ -717,25 +746,25 @@ public class FXMLDocumentController implements Initializable {
         idCol.setCellValueFactory(new PropertyValueFactory<>("doctorID"));
 
         TableColumn fnameCol = new TableColumn("First Name");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        fnameCol.setCellValueFactory(new PropertyValueFactory<>("firstName"));
 
         TableColumn lnameCol = new TableColumn("Last Name");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+        lnameCol.setCellValueFactory(new PropertyValueFactory<>("lastName"));
 
         TableColumn phone1Col = new TableColumn("Office Phone 1");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("phone1"));
+        phone1Col.setCellValueFactory(new PropertyValueFactory<>("phone1"));
 
         TableColumn phone2Col = new TableColumn("Office Phone 2");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("phone2"));
+        phone2Col.setCellValueFactory(new PropertyValueFactory<>("phone2"));
 
         TableColumn faxNoCol = new TableColumn("Fax Number");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("faxNo"));
+        faxNoCol.setCellValueFactory(new PropertyValueFactory<>("faxNo"));
 
         TableColumn emailCol = new TableColumn("Email Address");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+        emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
 
         TableColumn notesCol = new TableColumn("Notes");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("notes"));
+        notesCol.setCellValueFactory(new PropertyValueFactory<>("notes"));
 
         d_TableView.getColumns().addAll(idCol, fnameCol, lnameCol, phone1Col,
                 phone2Col, faxNoCol, emailCol, notesCol);
