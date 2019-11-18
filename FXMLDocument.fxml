@@ -208,13 +208,17 @@
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
-                                    <Label fx:id="a_patientIDLabel" text="Patient ID: *" />
-                                    <Label fx:id="a_doctorIDLabel" text="Doctor ID: *" GridPane.rowIndex="1" />
-                                    <Label fx:id="a_dateLabel" text="Date: *" GridPane.rowIndex="2" />
-                                    <TextField fx:id="a_patientIDTextField" GridPane.columnIndex="1" />
-                                    <TextField fx:id="a_doctorIDTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                    <DatePicker fx:id="a_dateDatePicker" prefHeight="27.0" prefWidth="245.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                    <Label fx:id="a_descriptionLabel" text="Description: *" GridPane.columnIndex="2" />
+                                 	<Label fx:id="a_appointmentIDLabel" text="Appointment ID: *" />
+                                    <Label fx:id="a_patientIDLabel" text="Patient ID: *" GridPane.rowIndex="1"/>
+                                    <Label fx:id="a_doctorIDLabel" text="Doctor ID: *" GridPane.rowIndex="2" />
+                                    <Label fx:id="a_dateLabel" text="Date: *" GridPane.rowIndex="3" />
+                                    <Label fx:id="a_timeLabel" text="Time: *" GridPane.rowIndex="4"/>
+                                    <TextField fx:id="a_appointmentIDTextField" GridPane.columnIndex="1" />
+                                    <TextField fx:id="a_patientIDTextField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                    <TextField fx:id="a_doctorIDTextField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <DatePicker fx:id="a_dateDatePicker" prefHeight="27.0" prefWidth="245.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <TextField fx:id="a_timeTextField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                                    <Label fx:id="a_descriptionLabel" text="Description: " GridPane.columnIndex="2" />
                                     <TextArea fx:id="a_descriptionTextArea" prefHeight="146.0" prefWidth="157.0" GridPane.columnIndex="3" GridPane.rowSpan="4" />
                                  </children>
                               </GridPane>

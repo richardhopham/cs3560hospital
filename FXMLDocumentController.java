@@ -168,6 +168,13 @@ public class FXMLDocumentController implements Initializable {
     private AnchorPane appointmentAnchorPane;
     @FXML
     private AnchorPane appointmentInfoAnchorPane;
+    
+    @FXML
+    private Label a_appointmentIDLabel;
+    
+    @FXML
+    private TextField a_appointmentIDTextField;
+    
     @FXML
     private Label a_patientIDLabel;
     
@@ -191,6 +198,12 @@ public class FXMLDocumentController implements Initializable {
     
     @FXML
     private TextArea a_descriptionTextArea;
+    
+    @FXML
+    private Label a_timeLabel;
+    
+    @FXML
+    private TextField a_timeTextField;
     
     @FXML
     private ButtonBar a_appointmentButtonBar;
@@ -824,13 +837,9 @@ public class FXMLDocumentController implements Initializable {
 
     @FXML
     private void a_editButton_OnAction(ActionEvent event) {
-    	String patientIDNum;
-    	String doctorIDNum;
-    	String dateNum; 
+    	String appointmentIDNum;
     	try {
-    		patientIDNum = a_TableView.getSelectionModel().getSelectedItem().getPatientID();
-    		doctorIDNum = a_TableView.getSelectionModel().getSelectedItem().getDoctorID();
-    		dateNum = a_TableView.getSelectionModel().getSelectedItem().getDate();
+    		appointmentIDNum = a_TableView.getSelectionModel().getSelectedItem().getAppointmentID();
     	} catch(Exception e) {
     		Alert alert = new Alert(AlertType.ERROR, "Select an Appointment to edit.");
     		alert.showAndWait();
@@ -844,19 +853,23 @@ public class FXMLDocumentController implements Initializable {
     	
     	try {
             Connection conn = DriverManager.getConnection(url, props);
-            String sqlStatement = "SELECT * FROM public.appointments WHERE patient_id = " + patientIDNum + " AND doctor_id = " + doctorIDNum + " AND date = (DATE '" + dateNum + "');";
+            String sqlStatement = "SELECT * FROM public.appointments WHERE appointment_id = " + appointmentIDNum + ";";
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sqlStatement);
             rs.next();
             
+            a_appointmentIDTextField.setText(rs.getString(1));
+            a_patientIDTextField.setText(rs.getString(2));
+            a_doctorIDTextField.setText(rs.getString(3));
+            
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-d");
-            String date = rs.getString(1);
+            String date = rs.getString(4);
             LocalDate localdate = LocalDate.parse(date, formatter);
             a_dateDatePicker.setValue(localdate);
             
-            a_patientIDTextField.setText(rs.getString(2));
-            a_descriptionTextArea.setText(rs.getString(3));
-            a_doctorIDTextField.setText(rs.getString(4));
+            a_descriptionTextArea.setText(rs.getString(5));
+            
+            a_timeTextField.setText(rs.getString(6));
             
             conn.close();
             a_saveButton.setDisable(false);
@@ -871,31 +884,28 @@ public class FXMLDocumentController implements Initializable {
 
     @FXML
     private void a_deleteButton_OnAction(ActionEvent event) throws SQLException {
-    	if(a_patientIDTextField.getText().equals("") || a_doctorIDTextField.getText().equals("") || a_dateDatePicker.getValue().equals(null)) {
+    	if(a_appointmentIDTextField.getText().equals("")) {
             Alert alert = new Alert(AlertType.ERROR, "Appointment must be selected"
                     + " and in edit mode to be deleted.");
             alert.showAndWait();
             return;
     	}
     	
-    	String patientIDNum = a_patientIDTextField.getText();
-    	String doctorIDNum = a_doctorIDTextField.getText();
-    	String dateNum = a_dateDatePicker.getValue().toString();
+    	String appointmentIDNum = a_appointmentIDTextField.getText();
     	
-    	if(validAppointmentEntry(patientIDNum, doctorIDNum, dateNum)) {
+    	if(validAppointmentEntry(appointmentIDNum)) {
     		Alert alert = new Alert(AlertType.CONFIRMATION, "Are you sure you want to delete this appointment?");
     		alert.showAndWait();
     		try {
     			Connection conn = DriverManager.getConnection(url, props);
-    			String sqlStatement = "DELETE FROM public.appointments WHERE patient_ID = " + patientIDNum 
-    					+ "AND doctor_id = " + doctorIDNum + "AND date = (DATE '" + dateNum + "');";
+    			String sqlStatement = "DELETE FROM public.appointments WHERE appointment_id = " + appointmentIDNum + ";";
     			Statement stmt = conn.createStatement();
     			stmt.executeUpdate(sqlStatement);
     			conn.close();
     		} catch(SQLException e) {
     			System.out.println(e.toString());
     		}
-    		if(validAppointmentEntry(patientIDNum, doctorIDNum, dateNum)) {
+    		if(validAppointmentEntry(appointmentIDNum)) {
     			alert = new Alert(AlertType.INFORMATION, "Entry deleted.");
     			alert.showAndWait();
     			clearAppointmentFields();
@@ -908,11 +918,10 @@ public class FXMLDocumentController implements Initializable {
     	updateAppointmentTable();
     }
 
-    private boolean validAppointmentEntry(String patientID, String doctorID, String date) {
+    private boolean validAppointmentEntry(String appointmentIDNum) {
         try {
             Connection conn = DriverManager.getConnection(url, props);
-            String sqlStatement = "SELECT * FROM public.appointments WHERE patient_id = " 
-            + patientID + " AND doctor_id = " + doctorID + " AND date = (DATE '" + date + "');";
+            String sqlStatement = "SELECT * FROM public.appointments WHERE appointment_id = " + appointmentIDNum + ";";
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sqlStatement);
 
@@ -930,19 +939,20 @@ public class FXMLDocumentController implements Initializable {
     
     @FXML
     private void a_saveButton_OnAction(ActionEvent event) {
-    	String patientIDNum = a_patientIDTextField.getText();
-    	String doctorIDNum = a_doctorIDTextField.getText();
-    	String dateNum = a_dateDatePicker.getValue().toString();
+    	String appointmentIDNum = a_appointmentIDTextField.getText();
     	
-    	if(!validAppointmentEntry(patientIDNum, doctorIDNum, dateNum)) {
+    	if(!validAppointmentEntry(appointmentIDNum)) {
     		try {
                 Connection conn = DriverManager.getConnection(url, props);
-                String sqlStatement = "INSERT INTO public.appointments(date, patient_id, reason_for_appointment, doctor_id) VALUES ('";
+                String sqlStatement = "INSERT INTO public.appointments(appointment_id, patient_id, doctor_id, date, reason_for_appointment, time) VALUES (";
                 
-                sqlStatement += a_dateDatePicker.getValue().toString() + "', ";
-                sqlStatement += a_patientIDTextField.getText() + ", '"; 
-                sqlStatement += a_descriptionTextArea.getText() + "', ";
-                sqlStatement += a_doctorIDTextField.getText();
+                sqlStatement += a_appointmentIDTextField.getText() + ", ";
+                sqlStatement += a_patientIDTextField.getText() + ", "; 
+                sqlStatement += a_doctorIDTextField.getText() + ", '";
+                sqlStatement += a_dateDatePicker.getValue().toString() + "', '";
+                sqlStatement += a_descriptionTextArea.getText() + "', '";
+                sqlStatement += a_timeTextField.getText() + "'";
+
                 sqlStatement += ");";
                 
                 Statement stmt = conn.createStatement();
@@ -965,14 +975,16 @@ public class FXMLDocumentController implements Initializable {
     		try {
     			Connection conn = DriverManager.getConnection(url, props);
     			String sqlStatement = "UPDATE public.appointments SET ";
-    			sqlStatement += "date = (DATE '" + a_dateDatePicker.getValue().toString() + "'), ";
+    			sqlStatement += "appointment_id = " + a_appointmentIDTextField.getText() + ", ";
     			sqlStatement += "patient_id = " + a_patientIDTextField.getText() + ", ";
+    			sqlStatement += "doctor_id = " + a_doctorIDTextField.getText() + ", ";
+    			sqlStatement += "date = (DATE '" + a_dateDatePicker.getValue().toString() + "'), ";
     			sqlStatement += "reason_for_appointment = '" + a_descriptionTextArea.getText() + "', ";
-    			sqlStatement += "doctor_id = " + a_doctorIDTextField.getText();
+    			sqlStatement += "time = '" + a_timeTextField.getText() + "' ";
     			sqlStatement += " WHERE ";
-    			sqlStatement += "patient_id = " + patientIDNum;
-    			sqlStatement += " AND doctor_id = " + doctorIDNum;
-    			sqlStatement += " AND date = (DATE '" + dateNum + "');";
+    			sqlStatement += "appointment_id = " + appointmentIDNum;
+    			sqlStatement += ";";
+
     			
     			Statement stmt = conn.createStatement();
     			stmt.executeUpdate(sqlStatement);
@@ -995,6 +1007,10 @@ public class FXMLDocumentController implements Initializable {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initializeAppointmentTableView() throws SQLException {
+    	
+    	TableColumn appointmentIDCol = new TableColumn("Appointment ID");
+    	appointmentIDCol.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
+    	
     	TableColumn patientIDCol = new TableColumn("Patient ID");
     	patientIDCol.setCellValueFactory(new PropertyValueFactory<>("patientID"));
     	
@@ -1004,10 +1020,13 @@ public class FXMLDocumentController implements Initializable {
     	TableColumn dateCol = new TableColumn("Date");
     	dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
     	
+    	TableColumn timeCol = new TableColumn("Time");
+    	timeCol.setCellValueFactory(new PropertyValueFactory<>("time"));
+    	
     	TableColumn descriptionCol = new TableColumn("Description");
     	descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
     	
-    	a_TableView.getColumns().addAll(patientIDCol, doctorIDCol, dateCol, descriptionCol);
+    	a_TableView.getColumns().addAll(appointmentIDCol, patientIDCol, doctorIDCol, dateCol, timeCol, descriptionCol);
     	
     	updateAppointmentTable();
     }
@@ -1016,16 +1035,18 @@ public class FXMLDocumentController implements Initializable {
     	a_TableView.getItems().clear();
     	
         Connection conn = DriverManager.getConnection(url, props);
-        String sqlStatement = "SELECT * FROM public.appointments ORDER BY date	;";
+        String sqlStatement = "SELECT * FROM public.appointments ORDER BY date, time;";
         Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery(sqlStatement);
         
         while(rs.next()) {
         	Appointment app = new Appointment();
-        	app.setDate(rs.getString(1));
+        	app.setAppointmentID(rs.getString(1));
         	app.setPatientID(rs.getString(2));
-        	app.setDescription(rs.getString(3));
-        	app.setDoctorID(rs.getString(4));
+        	app.setDoctorID(rs.getString(3));
+        	app.setDate(rs.getString(4));
+        	app.setDescription(rs.getString(5));
+        	app.setTime(rs.getString(6));
         	
         	a_TableView.getItems().add(app);
         }
@@ -1033,9 +1054,11 @@ public class FXMLDocumentController implements Initializable {
     }
     
     private void clearAppointmentFields() {
+    	a_appointmentIDTextField.setText("");
     	a_patientIDTextField.setText("");
     	a_doctorIDTextField.setText("");
     	a_dateDatePicker.setValue(null);
+    	a_timeTextField.setText("");
     	a_descriptionTextArea.setText("");
     }
     

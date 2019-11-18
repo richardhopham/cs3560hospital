@@ -2,8 +2,16 @@ package javafxmltestapp;
 
 public class Appointment {
 	
-	private String patientID, doctorID, date, description;
+	private String appointmentID, patientID, doctorID, date, time, description;
 
+	public String getAppointmentID() {
+		return appointmentID;
+	}
+	
+	public void setAppointmentID(String appointmentID) {
+		this.appointmentID = appointmentID;
+	}
+	
 	public String getPatientID() {
 		return patientID;
 	}
@@ -26,6 +34,14 @@ public class Appointment {
 
 	public void setDate(String date) {
 		this.date = date;
+	}
+	
+	public String getTime() {
+		return time;
+	}
+	
+	public void setTime(String time) {
+		this.time = time;
 	}
 
 	public String getDescription() {
