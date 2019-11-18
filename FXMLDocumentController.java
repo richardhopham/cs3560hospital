@@ -247,7 +247,7 @@ public class FXMLDocumentController implements Initializable {
     @FXML
     private Button ph_saveButton;
     @FXML
-    private TableView<?> ph_TableView;
+    private TableView<Pharmacy> ph_TableView;
     @FXML
     private TextField p_countryTextField;
 
@@ -264,6 +264,7 @@ public class FXMLDocumentController implements Initializable {
             initializePatientTableView();
             initializeDoctorTableView();
             initializeAppointmentTableView();
+            initializePharmacyTableView();
         } catch (SQLException ex) {
             Logger.getLogger(FXMLDocumentController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1038,21 +1039,217 @@ public class FXMLDocumentController implements Initializable {
     	a_descriptionTextArea.setText("");
     }
     
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void initializePharmacyTableView() throws SQLException {
+    	 TableColumn pharmIDCol = new TableColumn("Pharmacy ID");
+    	 pharmIDCol.setCellValueFactory(new PropertyValueFactory<>("pharmacyID"));
+
+         TableColumn nameCol = new TableColumn("Name");
+         nameCol.setCellValueFactory(new PropertyValueFactory<>("pharmacyName"));
+
+
+         TableColumn ad1Col = new TableColumn("Address");
+         ad1Col.setCellValueFactory(new PropertyValueFactory<>("pharmacyAddress"));
+
+         TableColumn ad2Col = new TableColumn("Address Line");
+         ad2Col.setCellValueFactory(new PropertyValueFactory<>("pharmAddressLine"));
+
+         TableColumn phoneCol = new TableColumn("Phone Number");
+         phoneCol.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
+
+         TableColumn headPharmCol = new TableColumn("Head Pharmacist");
+         headPharmCol.setCellValueFactory(new PropertyValueFactory<>("headPharmacist"));
+         
+         TableColumn faxCol = new TableColumn("Fax Number");
+         faxCol.setCellValueFactory(new PropertyValueFactory<>("pharmFaxNo"));
+         
+         TableColumn notesCol = new TableColumn("Notes");
+         notesCol.setCellValueFactory(new PropertyValueFactory<>("pharmNotes"));
+
+
+         ph_TableView.getColumns().addAll(pharmIDCol, nameCol, ad1Col, ad2Col,
+        		 phoneCol, headPharmCol, faxCol, notesCol);
+
+         updatePharmacyTable();
+    }
     
+    private void updatePharmacyTable() throws SQLException {
+    	ph_TableView.getItems().clear();
+    	
+    	Connection conn = DriverManager.getConnection(url, props);
+        String sqlStatement = "SELECT * FROM public.pharmacy ORDER BY pharmacy_id;";
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sqlStatement);
+        
+        while(rs.next()) {
+        	Pharmacy pharm = new Pharmacy();
+        	pharm.setpharmacyID(rs.getString(1));
+        	pharm.setPharmName(rs.getString(2));
+        	pharm.setAddress(rs.getString(3));
+        	pharm.setAddressLine(rs.getString(4));
+        	pharm.setPhone1(rs.getString(5));
+        	pharm.setPharmName(rs.getString(6));
+        	pharm.setFaxNo(rs.getString(7));
+        	pharm.setNotes(rs.getString(8));
+        	
+        	ph_TableView.getItems().add(pharm);
+        }
+        conn.close();
+    }
     @FXML
     private void ph_newButton_OnAction(ActionEvent event) {
+    	clearPharmacyFields();
+    	ph_saveButton.setDisable(false);
     }
     
     @FXML
     private void ph_editButton_OnAction(ActionEvent event) {
+    	String idNum;
+        try {
+            idNum = ph_TableView.getSelectionModel().getSelectedItem().getPharmacyID();
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR, "Select a Patient to edit.");
+            alert.showAndWait();
+            return;
+        }
+        
+        String url = "jdbc:postgresql://database-1.cakeqdu3h1oe.us-west-1.rds.amazonaws.com:5432/";
+        Properties props = new Properties();
+        props.setProperty("user", "postgres");
+        props.setProperty("password", "password");
+
+        try {
+            Connection conn = DriverManager.getConnection(url, props);
+            String sqlStatement = "SELECT * FROM public.patients WHERE patient_id = " + idNum + ";";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlStatement);
+            rs.next();
+
+            ph_pharmacyIDTextField.setText(rs.getString(1));
+            ph_nameTextField.setText(rs.getString(2));
+            ph_addressTextField.setText(rs.getString(3));
+            ph_addressLine2TextField.setText(rs.getString(4));
+            ph_phoneNoTextField.setText(rs.getString(5));
+            ph_pharmacistTextField.setText(rs.getString(6));
+            ph_faxNoTextField.setText(rs.getString(7));
+            ph_notesTextArea.setText(rs.getString(8));
+
+            conn.close();
+            ph_saveButton.setDisable(false);
+            ph_deleteButton.setDisable(false);
+
+        } catch (SQLException e) {
+            Alert alert = new Alert(AlertType.ERROR, "That pharmacy ID does not exist.");
+            alert.showAndWait();
+        }
     }
 
     @FXML
     private void ph_deleteButton_OnAction(ActionEvent event) {
+    	if (ph_pharmacyIDTextField.getText().equals("")) {
+            Alert alert = new Alert(AlertType.ERROR, "Pharmacy must be selected"
+                    + " and in edit mode to be deleted.");
+            alert.showAndWait();
+            return;
+        }
+
+        String idNum = ph_pharmacyIDTextField.getText();
+        if (validPatientEntry(idNum) == true) {
+            Alert alert = new Alert(AlertType.CONFIRMATION, "Are you sure you want to delete this patient?");
+            alert.showAndWait();
+            try {
+                Connection conn = DriverManager.getConnection(url, props);
+                String sqlStatement1 = "DELETE FROM public.pharmacy WHERE pharmacy_id = " + idNum + ";";
+                Statement stmt = conn.createStatement();
+                stmt.executeUpdate(sqlStatement1);
+                conn.close();
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+            }
+            if (validPatientEntry(idNum) == false) {
+                alert = new Alert(AlertType.INFORMATION, "Entry deleted.");
+                alert.showAndWait();
+                clearPatientFields();
+                ph_deleteButton.setDisable(true);
+            }
+        } else {
+            Alert alert = new Alert(AlertType.ERROR, "That pharmacy ID does not exist.");
+            alert.showAndWait();
+        }
     }
 
     @FXML
     private void ph_saveButton_OnAction(ActionEvent event) {
+    	 String idNum =ph_pharmacyIDTextField.getText();
+         try {
+             Connection conn = DriverManager.getConnection(url, props);
+             String sqlStatement = "";
+             if (!validPharmacyEntry(idNum)) {
+                 sqlStatement = "INSERT INTO public.pharmacy(\n" +
+                         "pharmacy_id, pharmacy_name, pharmacy_address, pharmacy_addressline, pharmacy_phone, pharmacy_pharmacist, pharmacy_fax, pharmacy_note) \n" +
+                         "VALUES(" + ph_pharmacyIDTextField.getText() + ", '" + ph_nameTextField.getText() + "', '" +
+                         ph_addressTextField.getText() + "', '" +
+                         ph_addressLine2TextField.getText() + "', " + ph_phoneNoTextField.getText() + ", '" +
+                         ph_pharmacistTextField.getText() + "', " + ph_faxNoTextField.getText() + ", '" +
+                         ph_notesTextArea.getText()+ "');";
+             } else {
+                 sqlStatement = "UPDATE public.pharmacy \nSET " +
+                         "pharmacy_id = " + ph_pharmacyIDTextField.getText() + ", " +
+                         "pharmacy_name = '" + ph_nameTextField.getText() + "', " +
+                         "pharmacy_address = '" + ph_addressTextField.getText() + "', " +
+                         "pharmacy_addressline = '" + ph_addressLine2TextField.getText() + "', " +
+                         "pharmacy_phone = " + ph_phoneNoTextField.getText() + ", " +
+                         "pharmacy_pharmacist = '" + ph_pharmacistTextField.getText() + "', " +
+                         "pharmacy_fax = " + ph_faxNoTextField.getText() + ", " +
+                         "pharmacy_note = '" + ph_notesTextArea.getText() + "' WHERE pharmacy_id = " + idNum + ";";
+             }
+
+             Statement stmt = conn.createStatement();
+             stmt.executeUpdate(sqlStatement);
+             conn.close();
+             ph_saveButton.setDisable(true);
+             updateDoctorTable();
+             clearDoctorFields();
+             Alert alert = new Alert(AlertType.INFORMATION, "New entry saved.");
+             alert.showAndWait();
+
+
+         } catch (SQLException e){
+             System.out.println(e.getMessage());
+             Alert alert = new Alert(AlertType.ERROR, "Error saving new entry. Double check that "
+                     + "all required fields are filled out and are in correct format.");
+             alert.showAndWait();
+         }
+    }
+    
+    private boolean validPharmacyEntry(String idNum) {
+    	try {
+            Connection conn = DriverManager.getConnection(url, props);
+            String sqlStatement = "SELECT * FROM Public.pharmacy WHERE "
+                    + "pharmacy_id=" + idNum + ";";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqlStatement);
+
+            conn.close();
+
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+    private void clearPharmacyFields() {
+    	 ph_pharmacyIDTextField.setText("");
+    	 ph_pharmacistTextField.setText("");
+    	 ph_nameTextField.setText("");
+         ph_addressTextField.setText("");
+         ph_addressLine2TextField.setText("");
+         ph_phoneNoTextField.setText("");
+         ph_faxNoTextField.setText("");
+         ph_notesTextArea.setText("");
     }
 
 }
