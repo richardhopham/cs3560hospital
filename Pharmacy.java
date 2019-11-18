@@ -16,11 +16,11 @@ public class Pharmacy {
         this.pharmacyID = pharmacyID;
     }
 
-    public String getPharmName() {
+    public String getPharmacyName() {
         return pharmacyName;
     }
 
-    public void setPharmName(String pharmacyName) {
+    public void setPharmacyName(String pharmacyName) {
         this.pharmacyName = pharmacyName;
     }
 
@@ -28,23 +28,23 @@ public class Pharmacy {
         return pharmPhoneNum;
     }
 
-    public void setPhone1(String phone) {
+    public void setPharmPhoneNum(String phone) {
         this.pharmPhoneNum = phone;
     }
 
-    public String getAddress() {
+    public String getPharmacyAddress() {
         return pharmacyAddress;
     }
 
-    public void setAddress(String address) {
+    public void setPharmacyAddress(String address) {
         this.pharmacyAddress = address;
     }
 
-    public String getAddressLine() {
+    public String getPharmAddressLine() {
         return pharmAddressLine;
     }
 
-    public void setAddressLine(String addressLine) {
+    public void setPharmAddressLine(String addressLine) {
         this.pharmAddressLine = addressLine;
     }
     
@@ -56,19 +56,19 @@ public class Pharmacy {
     	this.headPharmacist = headPharm;
     }
     
-    public String getFaxNo() {
+    public String getPharmFaxNo() {
         return pharmFaxNo;
     }
 
-    public void setFaxNo(String faxNo) {
+    public void setPharmFaxNo(String faxNo) {
         this.pharmFaxNo = faxNo;
     }
 
-    public String getNotes() {
+    public String getPharmNotes() {
         return pharmNotes;
     }
 
-    public void setNotes(String notes) {
+    public void setPharmNotes(String notes) {
         this.pharmNotes = notes;
     }
 

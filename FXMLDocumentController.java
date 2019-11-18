@@ -1055,7 +1055,7 @@ public class FXMLDocumentController implements Initializable {
          ad2Col.setCellValueFactory(new PropertyValueFactory<>("pharmAddressLine"));
 
          TableColumn phoneCol = new TableColumn("Phone Number");
-         phoneCol.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
+         phoneCol.setCellValueFactory(new PropertyValueFactory<>("pharmPhoneNum"));
 
          TableColumn headPharmCol = new TableColumn("Head Pharmacist");
          headPharmCol.setCellValueFactory(new PropertyValueFactory<>("headPharmacist"));
@@ -1084,13 +1084,13 @@ public class FXMLDocumentController implements Initializable {
         while(rs.next()) {
         	Pharmacy pharm = new Pharmacy();
         	pharm.setpharmacyID(rs.getString(1));
-        	pharm.setPharmName(rs.getString(2));
-        	pharm.setAddress(rs.getString(3));
-        	pharm.setAddressLine(rs.getString(4));
-        	pharm.setPhone1(rs.getString(5));
-        	pharm.setPharmName(rs.getString(6));
-        	pharm.setFaxNo(rs.getString(7));
-        	pharm.setNotes(rs.getString(8));
+        	pharm.setPharmacyName(rs.getString(2));
+        	pharm.setPharmacyAddress(rs.getString(3));
+        	pharm.setPharmAddressLine(rs.getString(4));
+        	pharm.setPharmPhoneNum(rs.getString(5));
+        	pharm.setHeadPharmacist(rs.getString(6));
+        	pharm.setPharmFaxNo(rs.getString(7));
+        	pharm.setPharmNotes(rs.getString(8));
         	
         	ph_TableView.getItems().add(pharm);
         }
@@ -1112,15 +1112,10 @@ public class FXMLDocumentController implements Initializable {
             alert.showAndWait();
             return;
         }
-        
-        String url = "jdbc:postgresql://database-1.cakeqdu3h1oe.us-west-1.rds.amazonaws.com:5432/";
-        Properties props = new Properties();
-        props.setProperty("user", "postgres");
-        props.setProperty("password", "password");
 
         try {
             Connection conn = DriverManager.getConnection(url, props);
-            String sqlStatement = "SELECT * FROM public.patients WHERE patient_id = " + idNum + ";";
+            String sqlStatement = "SELECT * FROM public.pharmacy WHERE pharmacy_id = " + idNum + ";";
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sqlStatement);
             rs.next();
@@ -1154,7 +1149,7 @@ public class FXMLDocumentController implements Initializable {
         }
 
         String idNum = ph_pharmacyIDTextField.getText();
-        if (validPatientEntry(idNum) == true) {
+        if (validPharmacyEntry(idNum) == true) {
             Alert alert = new Alert(AlertType.CONFIRMATION, "Are you sure you want to delete this patient?");
             alert.showAndWait();
             try {
@@ -1163,13 +1158,14 @@ public class FXMLDocumentController implements Initializable {
                 Statement stmt = conn.createStatement();
                 stmt.executeUpdate(sqlStatement1);
                 conn.close();
+                updatePharmacyTable();
             } catch (SQLException e) {
                 System.out.println(e.toString());
             }
-            if (validPatientEntry(idNum) == false) {
+            if (validPharmacyEntry(idNum) == false) {
                 alert = new Alert(AlertType.INFORMATION, "Entry deleted.");
                 alert.showAndWait();
-                clearPatientFields();
+                clearPharmacyFields();
                 ph_deleteButton.setDisable(true);
             }
         } else {
@@ -1208,8 +1204,8 @@ public class FXMLDocumentController implements Initializable {
              stmt.executeUpdate(sqlStatement);
              conn.close();
              ph_saveButton.setDisable(true);
-             updateDoctorTable();
-             clearDoctorFields();
+             updatePharmacyTable();
+             clearPharmacyFields();
              Alert alert = new Alert(AlertType.INFORMATION, "New entry saved.");
              alert.showAndWait();
 
